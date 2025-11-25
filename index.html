@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vestis Store - Bienvenido</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #8B9D9D;
+            min-height: 100vh;
+        }
+        
+        header {
+            background-color: white;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        header h1 {
+            font-size: 32px;
+        }
+        
+        nav {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+        
+        nav a {
+            text-decoration: none;
+            color: #333;
+        }
+        
+        nav input {
+            padding: 8px 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 200px;
+        }
+        
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+        
+        .modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            border-radius: 15px;
+            padding: 60px 80px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            text-align: center;
+        }
+        
+        .modal-header {
+            background-color: #B4D4D4;
+            height: 8px;
+            border-radius: 4px;
+            margin-bottom: 40px;
+        }
+        
+        .modal h2 {
+            font-size: 42px;
+            font-weight: bold;
+            margin-bottom: 60px;
+            color: #333;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 20px;
+            background-color: white;
+            border: 2px solid #333;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn:hover {
+            background-color: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Vestis Store</h1>
+        <nav>
+            <a href="#">Home</a>
+            <input type="search" placeholder="Buscar productos">
+            <a href="#">Contacto</a>
+            <span>🛒</span>
+            <span>👤</span>
+        </nav>
+    </header>
+
+    <div class="overlay"></div>
+    
+    <div class="modal">
+        <div class="modal-header"></div>
+        <h2>BIENVENIDO</h2>
+        <button class="btn" onclick="window.location.href='login.html'">INICIAR SESION</button>
+        <button class="btn" onclick="window.location.href='registro.html'">REGISTRARSE</button>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD5Q8M7chlhNvLuVlUT9vwVYi2YeeFVgdw",
+            authDomain: "vestis-store.firebaseapp.com",
+            databaseURL: "https://vestis-store-default-rtdb.firebaseio.com",
+            projectId: "vestis-store",
+            storageBucket: "vestis-store.firebasestorage.app",
+            messagingSenderId: "772191597035",
+            appId: "1:772191597035:web:d6581633f495e7b7b669ae"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // Verificar si ya hay sesión activa
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                window.location.href = 'home.html';
+            }
+        });
+    </script>
+</body>
+</html>

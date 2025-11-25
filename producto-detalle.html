@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vestis Store - Detalle Producto</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+        
+        header {
+            background-color: white;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        header h1 {
+            font-size: 28px;
+        }
+        
+        nav {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+        
+        nav a {
+            text-decoration: none;
+            color: #333;
+        }
+        
+        .search-bar {
+            padding: 8px 20px;
+            border: 1px solid #ccc;
+            border-radius: 25px;
+            width: 300px;
+            background-color: #f0f0f0;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 60px auto;
+            padding: 40px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .product-detail {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 60px;
+        }
+        
+        .product-image-section {
+            text-align: center;
+        }
+        
+        .product-image {
+            width: 100%;
+            max-width: 400px;
+            height: auto;
+            object-fit: contain;
+            margin-bottom: 30px;
+        }
+        
+        .product-actions {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+        
+        .btn-action {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        
+        .btn-update {
+            background-color: #2196F3;
+            color: white;
+        }
+        
+        .btn-delete {
+            background-color: #f44336;
+            color: white;
+        }
+        
+        .product-info {
+            padding: 20px 0;
+        }
+        
+        .product-title {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+        
+        .product-rating {
+            font-size: 24px;
+            color: #FFA500;
+            margin-bottom: 20px;
+        }
+        
+        .product-price {
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
+        
+        .sizes-section {
+            margin-bottom: 30px;
+        }
+        
+        .sizes-label {
+            font-weight: 600;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        
+        .sizes-options {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .size-box {
+            width: 60px;
+            height: 60px;
+            border: 2px solid #333;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        .specs-section {
+            margin-top: 40px;
+        }
+        
+        .specs-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        
+        .spec-row {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .spec-label {
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 14px;
+        }
+        
+        .spec-value {
+            text-transform: uppercase;
+        }
+        
+        .btn-back {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 12px 30px;
+            background-color: #6c757d;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 60px;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Vestis Store</h1>
+        <nav>
+            <a href="productos.html">Home</a>
+            <input type="search" class="search-bar" placeholder="Buscar productos.....">
+            <a href="#">Contacto</a>
+            <button class="btn-add" onclick="window.location.href='producto-form.html'" style="background-color: #4CAF50; color: white; border: none; padding: 10px 15px; border-radius: 50%; cursor: pointer; font-size: 20px;">+</button>
+            <span>🛒</span>
+            <span>👤</span>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div id="loading" class="loading">Cargando producto...</div>
+        
+        <div id="productDetail" style="display: none;">
+            <div class="product-detail">
+                <div class="product-image-section">
+                    <img id="productImage" src="" alt="Producto" class="product-image">
+                    <div class="product-actions">
+                        <button class="btn-action btn-update" onclick="editProduct()" title="Actualizar">
+                            🔄
+                        </button>
+                        <button class="btn-action btn-delete" onclick="deleteProduct()" title="Eliminar">
+                            🗑️
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="product-info">
+                    <h1 class="product-title" id="productName"></h1>
+                    <div class="product-rating">⭐⭐⭐⭐⭐</div>
+                    <div class="product-price" id="productPrice"></div>
+                    
+                    <div class="sizes-section">
+                        <div class="sizes-label">TALLAS :</div>
+                        <div class="sizes-options" id="productSizes"></div>
+                    </div>
+                    
+                    <div class="specs-section">
+                        <h3 class="specs-title">ESPECIFICACIONES</h3>
+                        
+                        <div class="spec-row">
+                            <div class="spec-label">Material del vestuario</div>
+                            <div class="spec-value" id="productMaterial"></div>
+                        </div>
+                        
+                        <div class="spec-row">
+                            <div class="spec-label">Garantia</div>
+                            <div class="spec-value" id="productGarantia"></div>
+                        </div>
+                        
+                        <div class="spec-row">
+                            <div class="spec-label">Pais de origen</div>
+                            <div class="spec-value" id="productPais"></div>
+                        </div>
+                        
+                        <div class="spec-row">
+                            <div class="spec-label">Genero</div>
+                            <div class="spec-value" id="productGenero"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <a href="productos.html" class="btn-back">← Volver a productos</a>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, doc, getDoc, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD5Q8M7chlhNvLuVlUT9vwVYi2YeeFVgdw",
+            authDomain: "vestis-store.firebaseapp.com",
+            databaseURL: "https://vestis-store-default-rtdb.firebaseio.com",
+            projectId: "vestis-store",
+            storageBucket: "vestis-store.firebasestorage.app",
+            messagingSenderId: "772191597035",
+            appId: "1:772191597035:web:d6581633f495e7b7b669ae"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentProductId = null;
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                window.location.href = 'index.html';
+            } else {
+                const urlParams = new URLSearchParams(window.location.search);
+                currentProductId = urlParams.get('id');
+                
+                if (currentProductId) {
+                    await loadProduct(currentProductId);
+                } else {
+                    window.location.href = 'productos.html';
+                }
+            }
+        });
+
+        async function loadProduct(productId) {
+            const loading = document.getElementById('loading');
+            const detail = document.getElementById('productDetail');
+
+            try {
+                const docRef = doc(db, 'productos', productId);
+                const docSnap = await getDoc(docRef);
+                
+                if (docSnap.exists()) {
+                    const product = docSnap.data();
+                    
+                    document.getElementById('productName').textContent = product.nombre || 'Sin nombre';
+                    document.getElementById('productPrice').textContent = `$ ${Number(product.precio || 0).toLocaleString()}`;
+                    document.getElementById('productImage').src = product.imagenUrl || 'https://via.placeholder.com/400?text=Sin+Imagen';
+                    document.getElementById('productMaterial').textContent = product.material || 'No especificado';
+                    document.getElementById('productGarantia').textContent = product.garantia || 'No especificado';
+                    document.getElementById('productPais').textContent = product.paisOrigen || 'No especificado';
+                    document.getElementById('productGenero').textContent = product.genero || 'No especificado';
+                    
+                    // Mostrar tallas
+                    const sizesContainer = document.getElementById('productSizes');
+                    if (product.tallas && product.tallas.length > 0) {
+                        sizesContainer.innerHTML = product.tallas.map(size => 
+                            `<div class="size-box">${size}</div>`
+                        ).join('');
+                    } else {
+                        sizesContainer.innerHTML = '<div>No hay tallas disponibles</div>';
+                    }
+                    
+                    loading.style.display = 'none';
+                    detail.style.display = 'block';
+                } else {
+                    loading.innerHTML = 'Producto no encontrado';
+                }
+            } catch (error) {
+                loading.innerHTML = 'Error al cargar producto: ' + error.message;
+            }
+        }
+
+        window.editProduct = function() {
+            window.location.href = `producto-form.html?id=${currentProductId}`;
+        };
+
+        window.deleteProduct = async function() {
+            if (confirm('¿Estás seguro de que deseas eliminar este producto?')) {
+                try {
+                    await deleteDoc(doc(db, 'productos', currentProductId));
+                    alert('Producto eliminado exitosamente');
+                    window.location.href = 'productos.html';
+                } catch (error) {
+                    alert('Error al eliminar producto: ' + error.message);
+                }
+            }
+        };
+    </script>
+</body>
+</html>

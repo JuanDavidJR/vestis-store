@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vestis Store - Gestión de Producto</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            padding: 40px 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            padding: 40px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .btn-action {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        
+        .btn-create {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .btn-update {
+            background-color: #2196F3;
+            color: white;
+        }
+        
+        .btn-delete {
+            background-color: #f44336;
+            color: white;
+        }
+        
+        .btn-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+        
+        .image-upload {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 40px;
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+        
+        .image-upload img {
+            max-width: 200px;
+            max-height: 200px;
+            object-fit: contain;
+            margin-bottom: 15px;
+        }
+        
+        .upload-icon {
+            font-size: 60px;
+            color: #ccc;
+            margin-bottom: 10px;
+        }
+        
+        .form-grid {
+            display: grid;
+            gap: 25px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+        
+        input[type="text"],
+        input[type="number"],
+        input[type="url"] {
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .sizes-group {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .size-option {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .size-option.selected {
+            border-color: #2196F3;
+            background-color: #E3F2FD;
+        }
+        
+        .message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            display: none;
+        }
+        
+        .message.success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .btn-back {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #6c757d;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 15px;
+            margin-top: 30px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-submit:hover {
+            background-color: #45a049;
+        }
+
+        #deleteBtn {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-actions">
+            <button class="btn-action btn-create" id="createBtn" style="display: none;">
+                <div class="btn-icon" style="background-color: #4CAF50;">+</div>
+                Crear
+            </button>
+            <button class="btn-action btn-update" id="updateBtn" onclick="handleSubmit()" style="display: none;">
+                <div class="btn-icon" style="background-color: #2196F3;">🔄</div>
+                Actualizar
+            </button>
+            <button class="btn-action btn-delete" id="deleteBtn" onclick="handleDelete()">
+                <div class="btn-icon" style="background-color: #f44336;">🗑️</div>
+                Eliminar
+            </button>
+        </div>
+
+        <div id="message" class="message"></div>
+
+        <div class="image-upload" onclick="document.getElementById('imageInput').click()">
+            <div id="imagePreview">
+                <div class="upload-icon">📷</div>
+                <p>Haz clic para subir imagen</p>
+                <input type="file" id="imageInput" accept="image/*" style="display: none;" onchange="previewImage(event)">
+            </div>
+        </div>
+
+        <div class="form-grid">
+            <div class="form-group">
+                <label>PRECIO</label>
+                <input type="number" id="precio" placeholder="30000" required>
+            </div>
+
+            <div class="form-group">
+                <label>NOMBRE</label>
+                <input type="text" id="nombre" placeholder="Polo negra" required>
+            </div>
+
+            <div class="form-group">
+                <label>TALLAS DISPONIBLES</label>
+                <div class="sizes-group">
+                    <div class="size-option" onclick="toggleSize(this, 'S')">S</div>
+                    <div class="size-option" onclick="toggleSize(this, 'M')">M</div>
+                    <div class="size-option" onclick="toggleSize(this, 'L')">L</div>
+                    <div class="size-option" onclick="toggleSize(this, 'XL')">XL</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>MATERIAL DEL VESTUARIO</label>
+                <input type="text" id="material" placeholder="Poliamida" required>
+            </div>
+
+            <div class="form-group">
+                <label>GARANTIA</label>
+                <input type="text" id="garantia" placeholder="1 MES" required>
+            </div>
+
+            <div class="form-group">
+                <label>PAIS DE ORIGEN</label>
+                <input type="text" id="paisOrigen" placeholder="COLOMBIA" required>
+            </div>
+
+            <div class="form-group">
+                <label>GENERO</label>
+                <input type="text" id="genero" placeholder="HOMBRE" required>
+            </div>
+
+            <div class="form-group">
+                <label>URL DE LA IMAGEN (opcional)</label>
+                <input type="url" id="imagenUrl" placeholder="https://ejemplo.com/imagen.jpg">
+            </div>
+        </div>
+
+        <button class="btn-submit" onclick="handleSubmit()">GUARDAR PRODUCTO</button>
+
+        <a href="productos.html" class="btn-back">← Volver a productos</a>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, doc, getDoc, setDoc, addDoc, collection, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD5Q8M7chlhNvLuVlUT9vwVYi2YeeFVgdw",
+            authDomain: "vestis-store.firebaseapp.com",
+            databaseURL: "https://vestis-store-default-rtdb.firebaseio.com",
+            projectId: "vestis-store",
+            storageBucket: "vestis-store.firebasestorage.app",
+            messagingSenderId: "772191597035",
+            appId: "1:772191597035:web:d6581633f495e7b7b669ae"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let selectedSizes = [];
+        let currentProductId = null;
+        let imageFile = null;
+
+        // Verificar autenticación
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                window.location.href = 'index.html';
+            } else {
+                // Verificar si estamos editando
+                const urlParams = new URLSearchParams(window.location.search);
+                currentProductId = urlParams.get('id');
+                
+                if (currentProductId) {
+                    document.getElementById('updateBtn').style.display = 'flex';
+                    document.getElementById('deleteBtn').style.display = 'flex';
+                    await loadProduct(currentProductId);
+                } else {
+                    document.getElementById('createBtn').style.display = 'flex';
+                }
+            }
+        });
+
+        async function loadProduct(productId) {
+            try {
+                const docRef = doc(db, 'productos', productId);
+                const docSnap = await getDoc(docRef);
+                
+                if (docSnap.exists()) {
+                    const product = docSnap.data();
+                    document.getElementById('nombre').value = product.nombre || '';
+                    document.getElementById('precio').value = product.precio || '';
+                    document.getElementById('material').value = product.material || '';
+                    document.getElementById('garantia').value = product.garantia || '';
+                    document.getElementById('paisOrigen').value = product.paisOrigen || '';
+                    document.getElementById('genero').value = product.genero || '';
+                    document.getElementById('imagenUrl').value = product.imagenUrl || '';
+                    
+                    if (product.imagenUrl) {
+                        document.getElementById('imagePreview').innerHTML = `
+                            <img src="${product.imagenUrl}" alt="Producto">
+                            <p>Haz clic para cambiar imagen</p>
+                        `;
+                    }
+                    
+                    if (product.tallas) {
+                        selectedSizes = product.tallas;
+                        product.tallas.forEach(size => {
+                            const sizeElements = document.querySelectorAll('.size-option');
+                            sizeElements.forEach(el => {
+                                if (el.textContent === size) {
+                                    el.classList.add('selected');
+                                }
+                            });
+                        });
+                    }
+                }
+            } catch (error) {
+                showMessage('Error al cargar producto: ' + error.message, 'error');
+            }
+        }
+
+        window.toggleSize = function(element, size) {
+            element.classList.toggle('selected');
+            if (selectedSizes.includes(size)) {
+                selectedSizes = selectedSizes.filter(s => s !== size);
+            } else {
+                selectedSizes.push(size);
+            }
+        };
+
+        window.previewImage = function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                imageFile = file;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('imagePreview').innerHTML = `
+                        <img src="${e.target.result}" alt="Preview">
+                        <p>Haz clic para cambiar imagen</p>
+                    `;
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        window.handleSubmit = async function() {
+            const nombre = document.getElementById('nombre').value.trim();
+            const precio = document.getElementById('precio').value;
+            const material = document.getElementById('material').value.trim();
+            const garantia = document.getElementById('garantia').value.trim();
+            const paisOrigen = document.getElementById('paisOrigen').value.trim();
+            const genero = document.getElementById('genero').value.trim();
+            const imagenUrl = document.getElementById('imagenUrl').value.trim();
+
+            if (!nombre || !precio || !material || !garantia || !paisOrigen || !genero) {
+                showMessage('Por favor completa todos los campos requeridos', 'error');
+                return;
+            }
+
+            const productData = {
+                nombre,
+                precio: Number(precio),
+                material,
+                garantia,
+                paisOrigen,
+                genero,
+                tallas: selectedSizes,
+                imagenUrl: imagenUrl || 'https://via.placeholder.com/200?text=Sin+Imagen',
+                fechaActualizacion: new Date().toISOString()
+            };
+
+            try {
+                if (currentProductId) {
+                    // Actualizar producto existente
+                    await setDoc(doc(db, 'productos', currentProductId), productData);
+                    showMessage('¡Producto actualizado exitosamente!', 'success');
+                } else {
+                    // Crear nuevo producto
+                    productData.fechaCreacion = new Date().toISOString();
+                    await addDoc(collection(db, 'productos'), productData);
+                    showMessage('¡Producto creado exitosamente!', 'success');
+                }
+                
+                setTimeout(() => {
+                    window.location.href = 'productos.html';
+                }, 1500);
+            } catch (error) {
+                showMessage('Error al guardar producto: ' + error.message, 'error');
+            }
+        };
+
+        window.handleDelete = async function() {
+            if (!currentProductId) return;
+            
+            if (confirm('¿Estás seguro de que deseas eliminar este producto?')) {
+                try {
+                    await deleteDoc(doc(db, 'productos', currentProductId));
+                    showMessage('Producto eliminado exitosamente', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'productos.html';
+                    }, 1500);
+                } catch (error) {
+                    showMessage('Error al eliminar producto: ' + error.message, 'error');
+                }
+            }
+        };
+
+        function showMessage(text, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = text;
+            messageDiv.className = 'message ' + type;
+            messageDiv.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

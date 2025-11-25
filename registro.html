@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vestis Store - Registro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+        }
+        
+        .register-container {
+            background-color: white;
+            padding: 60px 80px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            width: 100%;
+        }
+        
+        h2 {
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        label {
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        input {
+            padding: 12px;
+            border: 2px solid #333;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .btn-primary {
+            width: 100%;
+            padding: 15px;
+            margin-top: 30px;
+            background-color: #4A90E2;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary:hover {
+            background-color: #357ABD;
+        }
+
+        .btn-primary:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .message {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            display: none;
+        }
+        
+        .message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .message.info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .back-link {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .back-link a {
+            background: none;
+            border: none;
+            color: #4A90E2;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .password-hint {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <h2>REGISTRO</h2>
+        
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Nombre</label>
+                <input type="text" id="nombre" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Celular</label>
+                <input type="tel" id="celular" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Apellido</label>
+                <input type="text" id="apellido" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Correo electronico</label>
+                <input type="email" id="email" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Cedula</label>
+                <input type="text" id="cedula" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Contraseña</label>
+                <input type="password" id="password" required minlength="6">
+                <div class="password-hint">Mínimo 6 caracteres</div>
+            </div>
+        </div>
+        
+        <div id="message" class="message"></div>
+        
+        <button class="btn-primary" id="btnRegister" onclick="handleRegister()">REGISTRARSE</button>
+        
+        <div class="back-link">
+            <a href="index.html">Volver</a>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, createUserWithEmailAndPassword, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, doc, setDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD5Q8M7chlhNvLuVlUT9vwVYi2YeeFVgdw",
+            authDomain: "vestis-store.firebaseapp.com",
+            databaseURL: "https://vestis-store-default-rtdb.firebaseio.com",
+            projectId: "vestis-store",
+            storageBucket: "vestis-store.firebasestorage.app",
+            messagingSenderId: "772191597035",
+            appId: "1:772191597035:web:d6581633f495e7b7b669ae"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Verificar si ya hay sesión activa
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                window.location.href = 'home.html';
+            }
+        });
+
+        // Hacer la función global
+        window.handleRegister = async function() {
+            const nombre = document.getElementById('nombre').value.trim();
+            const apellido = document.getElementById('apellido').value.trim();
+            const cedula = document.getElementById('cedula').value.trim();
+            const celular = document.getElementById('celular').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const messageDiv = document.getElementById('message');
+            const btnRegister = document.getElementById('btnRegister');
+            
+            messageDiv.style.display = 'none';
+            
+            // Validaciones
+            if (!nombre || !apellido || !cedula || !celular || !email || !password) {
+                showMessage('Por favor completa todos los campos', 'error');
+                return;
+            }
+
+            if (password.length < 6) {
+                showMessage('La contraseña debe tener al menos 6 caracteres', 'error');
+                return;
+            }
+            
+            // Deshabilitar botón mientras procesa
+            btnRegister.disabled = true;
+            btnRegister.textContent = 'REGISTRANDO...';
+            showMessage('Creando tu cuenta...', 'info');
+            
+            try {
+                console.log('Intentando crear usuario...');
+                
+                // Crear usuario en Firebase Authentication
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                console.log('Usuario creado en Authentication:', userCredential.user.uid);
+                
+                showMessage('Guardando información adicional...', 'info');
+                
+                // Guardar datos adicionales en Firestore
+                await setDoc(doc(db, 'usuarios', userCredential.user.uid), {
+                    nombre: nombre,
+                    apellido: apellido,
+                    cedula: cedula,
+                    celular: celular,
+                    email: email,
+                    fechaRegistro: new Date().toISOString()
+                });
+                
+                console.log('Datos guardados en Firestore');
+                
+                showMessage('¡Registro exitoso! Redirigiendo...', 'success');
+                setTimeout(() => {
+                    window.location.href = 'home.html';
+                }, 1500);
+                
+            } catch (error) {
+                console.error('Error completo:', error);
+                console.error('Código de error:', error.code);
+                console.error('Mensaje:', error.message);
+                
+                let errorMessage = 'Error al registrarse';
+                
+                if (error.code === 'auth/email-already-in-use') {
+                    errorMessage = 'Este correo ya está registrado. Intenta iniciar sesión.';
+                } else if (error.code === 'auth/weak-password') {
+                    errorMessage = 'La contraseña debe tener al menos 6 caracteres';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMessage = 'El formato del correo electrónico no es válido';
+                } else if (error.code === 'auth/operation-not-allowed') {
+                    errorMessage = 'El registro no está habilitado. Contacta al administrador.';
+                } else if (error.code === 'permission-denied') {
+                    errorMessage = 'Error de permisos en la base de datos. Verifica las reglas de Firestore.';
+                } else {
+                    errorMessage = `Error: ${error.message}`;
+                }
+                
+                showMessage(errorMessage, 'error');
+                btnRegister.disabled = false;
+                btnRegister.textContent = 'REGISTRARSE';
+            }
+        };
+
+        function showMessage(text, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = text;
+            messageDiv.className = 'message ' + type;
+            messageDiv.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

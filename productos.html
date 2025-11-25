@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vestis Store - Productos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+        
+        header {
+            background-color: white;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        header h1 {
+            font-size: 28px;
+        }
+        
+        nav {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+        
+        nav a {
+            text-decoration: none;
+            color: #333;
+            font-size: 16px;
+        }
+        
+        .search-bar {
+            padding: 8px 20px;
+            border: 1px solid #ccc;
+            border-radius: 25px;
+            width: 300px;
+            background-color: #f0f0f0;
+        }
+        
+        .btn-add {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn-logout {
+            padding: 8px 20px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+        
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+        
+        .product-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .product-image {
+            width: 100%;
+            height: 200px;
+            object-fit: contain;
+            margin-bottom: 15px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+        }
+        
+        .product-name {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+        
+        .product-price {
+            font-size: 18px;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+        
+        .categories-section {
+            margin-top: 60px;
+            background-color: #e8f4f8;
+            padding: 40px;
+            border-radius: 10px;
+        }
+        
+        .categories-title {
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 30px;
+        }
+        
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+        
+        .category-card {
+            background-color: white;
+            padding: 30px;
+            text-align: center;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+        
+        .category-image {
+            width: 100%;
+            height: 180px;
+            object-fit: contain;
+            margin-bottom: 15px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 60px;
+            font-size: 20px;
+        }
+
+        .no-products {
+            text-align: center;
+            padding: 60px;
+            color: #666;
+        }
+
+        footer {
+            background-color: #e8f4f8;
+            padding: 40px;
+            margin-top: 60px;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 40px;
+        }
+
+        .footer-section h3 {
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .footer-section a {
+            display: block;
+            color: #666;
+            text-decoration: none;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Vestis Store</h1>
+        <nav>
+            <a href="home.html">Home</a>
+            <input type="search" class="search-bar" placeholder="Buscar productos.....">
+            <a href="#">Contacto</a>
+            <button class="btn-add" onclick="window.location.href='producto-form.html'" title="Agregar producto">+</button>
+            <span>🛒</span>
+            <span id="userEmail">👤</span>
+            <button class="btn-logout" onclick="handleLogout()">Cerrar Sesión</button>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div id="loading" class="loading">Cargando productos...</div>
+        
+        <div id="productsContainer" style="display: none;">
+            <div class="products-grid" id="productsGrid"></div>
+            
+            <div class="categories-section">
+                <h2 class="categories-title">Categorias</h2>
+                <div class="categories-grid">
+                    <div class="category-card" onclick="filterByCategory('chaquetas')">
+                        <img src="https://via.placeholder.com/200x180?text=Chaquetas" alt="Chaquetas" class="category-image">
+                        <h3>Chaquetas</h3>
+                    </div>
+                    <div class="category-card" onclick="filterByCategory('pantalones')">
+                        <img src="https://via.placeholder.com/200x180?text=Pantalones" alt="Pantalones" class="category-image">
+                        <h3>Pantalones</h3>
+                    </div>
+                    <div class="category-card" onclick="filterByCategory('camisas')">
+                        <img src="https://via.placeholder.com/200x180?text=Camisas" alt="Camisas" class="category-image">
+                        <h3>Camisas</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Vestis Store</h3>
+            </div>
+            <div class="footer-section">
+                <h3>Information</h3>
+                <a href="#">About</a>
+                <a href="#">Product</a>
+                <a href="#">Blog</a>
+            </div>
+            <div class="footer-section">
+                <h3>Company</h3>
+                <a href="#">Community</a>
+                <a href="#">Career</a>
+                <a href="#">Our story</a>
+            </div>
+            <div class="footer-section">
+                <h3>Contact</h3>
+                <a href="#">Getting Started</a>
+                <a href="#">Pricing</a>
+                <a href="#">Resources</a>
+            </div>
+        </div>
+    </footer>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, collection, getDocs, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD5Q8M7chlhNvLuVlUT9vwVYi2YeeFVgdw",
+            authDomain: "vestis-store.firebaseapp.com",
+            databaseURL: "https://vestis-store-default-rtdb.firebaseio.com",
+            projectId: "vestis-store",
+            storageBucket: "vestis-store.firebasestorage.app",
+            messagingSenderId: "772191597035",
+            appId: "1:772191597035:web:d6581633f495e7b7b669ae"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let allProducts = [];
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                document.getElementById('userEmail').textContent = '👤 ' + user.email;
+                await loadProducts();
+            } else {
+                window.location.href = 'index.html';
+            }
+        });
+
+        async function loadProducts() {
+            const loading = document.getElementById('loading');
+            const container = document.getElementById('productsContainer');
+            const grid = document.getElementById('productsGrid');
+
+            try {
+                const q = query(collection(db, 'productos'), orderBy('nombre'));
+                const querySnapshot = await getDocs(q);
+                
+                allProducts = [];
+                querySnapshot.forEach((doc) => {
+                    allProducts.push({ id: doc.id, ...doc.data() });
+                });
+
+                loading.style.display = 'none';
+                container.style.display = 'block';
+
+                if (allProducts.length === 0) {
+                    grid.innerHTML = '<div class="no-products">No hay productos. Haz clic en + para agregar uno.</div>';
+                } else {
+                    displayProducts(allProducts);
+                }
+            } catch (error) {
+                console.error('Error al cargar productos:', error);
+                loading.innerHTML = 'Error al cargar productos: ' + error.message;
+            }
+        }
+
+        function displayProducts(products) {
+            const grid = document.getElementById('productsGrid');
+            grid.innerHTML = '';
+
+            products.forEach(product => {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.onclick = () => window.location.href = `producto-detalle.html?id=${product.id}`;
+                
+                card.innerHTML = `
+                    <img src="${product.imagenUrl || 'https://via.placeholder.com/200?text=Sin+Imagen'}" 
+                         alt="${product.nombre}" 
+                         class="product-image">
+                    <div class="product-name">${product.nombre}</div>
+                    <div class="product-price">$${Number(product.precio).toLocaleString()}</div>
+                `;
+                
+                grid.appendChild(card);
+            });
+        }
+
+        window.filterByCategory = function(category) {
+            const filtered = allProducts.filter(p => 
+                p.genero && p.genero.toLowerCase().includes(category)
+            );
+            displayProducts(filtered.length > 0 ? filtered : allProducts);
+        };
+
+        window.handleLogout = async function() {
+            try {
+                await signOut(auth);
+                window.location.href = 'index.html';
+            } catch (error) {
+                alert('Error al cerrar sesión');
+            }
+        };
+    </script>
+</body>
+</html>
