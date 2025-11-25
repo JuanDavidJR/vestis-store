@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error - Vestis Store</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .error-container {
+            background-color: white;
+            border-radius: 20px;
+            padding: 60px;
+            text-align: center;
+            max-width: 600px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        .error-icon {
+            font-size: 120px;
+            margin-bottom: 20px;
+        }
+        
+        .error-code {
+            font-size: 80px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+        
+        .error-title {
+            font-size: 32px;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        
+        .error-message {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+        
+        .error-actions {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 15px 35px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-primary {
+            background-color: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #5568d3;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background-color: #e0e0e0;
+            color: #333;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #d0d0d0;
+            transform: translateY(-2px);
+        }
+
+        .error-details {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            text-align: left;
+            display: none;
+        }
+
+        .error-details h4 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .error-details pre {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 12px;
+            color: #e74c3c;
+        }
+
+        .toggle-details {
+            margin-top: 20px;
+            background: none;
+            border: none;
+            color: #667eea;
+            text-decoration: underline;
+            cursor: pointer;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-icon">🔧</div>
+        <div class="error-code" id="errorCode">404</div>
+        <h1 class="error-title" id="errorTitle">¡Ups! Algo salió mal</h1>
+        <p class="error-message" id="errorMessage">
+            La página que buscas no existe o ha sido movida.
+        </p>
+        
+        <div class="error-actions">
+            <a href="index.html" class="btn btn-primary">🏠 Volver al inicio</a>
+            <button onclick="window.history.back()" class="btn btn-secondary">← Página anterior</button>
+        </div>
+
+        <button class="toggle-details" onclick="toggleDetails()">
+            Ver detalles técnicos
+        </button>
+
+        <div class="error-details" id="errorDetails">
+            <h4>Información técnica:</h4>
+            <pre id="technicalInfo"></pre>
+        </div>
+    </div>
+
+    <script>
+        // Detectar tipo de error desde la URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const errorType = urlParams.get('type') || '404';
+        const errorMsg = urlParams.get('msg') || '';
+
+        const errorConfig = {
+            '404': {
+                code: '404',
+                title: 'Página no encontrada',
+                message: 'La página que buscas no existe o ha sido movida.',
+                icon: '🔍'
+            },
+            '500': {
+                code: '500',
+                title: 'Error del servidor',
+                message: 'Estamos experimentando problemas técnicos. Por favor, intenta más tarde.',
+                icon: '⚠️'
+            },
+            'auth': {
+                code: '401',
+                title: 'Acceso denegado',
+                message: 'No tienes permisos para acceder a esta página. Por favor, inicia sesión.',
+                icon: '🔒'
+            },
+            'network': {
+                code: 'RED',
+                title: 'Sin conexión',
+                message: 'No se pudo conectar al servidor. Verifica tu conexión a internet.',
+                icon: '📡'
+            },
+            'firebase': {
+                code: 'DB',
+                title: 'Error de base de datos',
+                message: 'No se pudo conectar con la base de datos. Intenta recargar la página.',
+                icon: '💾'
+            }
+        };
+
+        const config = errorConfig[errorType] || errorConfig['404'];
+        
+        document.getElementById('errorCode').textContent = config.code;
+        document.getElementById('errorTitle').textContent = config.title;
+        document.getElementById('errorMessage').textContent = errorMsg || config.message;
+        document.querySelector('.error-icon').textContent = config.icon;
+
+        // Información técnica
+        const technicalInfo = {
+            'Tipo de error': errorType,
+            'Timestamp': new Date().toLocaleString(),
+            'URL actual': window.location.href,
+            'URL anterior': document.referrer || 'N/A',
+            'Navegador': navigator.userAgent,
+            'Mensaje personalizado': errorMsg || 'N/A'
+        };
+
+        document.getElementById('technicalInfo').textContent = JSON.stringify(technicalInfo, null, 2);
+
+        function toggleDetails() {
+            const details = document.getElementById('errorDetails');
+            details.style.display = details.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // Registrar error en consola
+        console.error('Error capturado:', technicalInfo);
+    </script>
+</body>
+</html>

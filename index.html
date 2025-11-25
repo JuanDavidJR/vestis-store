@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vestis Store - Bienvenido</title>
+    <title>Vestis Store - Tienda de Ropa</title>
     <style>
         * {
             margin: 0;
@@ -13,8 +13,7 @@
         
         body {
             font-family: Arial, sans-serif;
-            background-color: #8B9D9D;
-            min-height: 100vh;
+            background-color: #f5f5f5;
         }
         
         header {
@@ -24,10 +23,12 @@
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid #ddd;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
         
         header h1 {
-            font-size: 32px;
+            font-size: 28px;
+            cursor: pointer;
         }
         
         nav {
@@ -39,95 +40,284 @@
         nav a {
             text-decoration: none;
             color: #333;
+            font-size: 16px;
         }
         
-        nav input {
-            padding: 8px 15px;
+        .search-bar {
+            padding: 8px 20px;
             border: 1px solid #ccc;
-            border-radius: 5px;
-            width: 200px;
+            border-radius: 25px;
+            width: 300px;
+            background-color: #f0f0f0;
         }
         
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 999;
-        }
-        
-        .modal {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: white;
-            border-radius: 15px;
-            padding: 60px 80px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-            z-index: 1000;
-            text-align: center;
-        }
-        
-        .modal-header {
-            background-color: #B4D4D4;
-            height: 8px;
-            border-radius: 4px;
-            margin-bottom: 40px;
-        }
-        
-        .modal h2 {
-            font-size: 42px;
-            font-weight: bold;
-            margin-bottom: 60px;
-            color: #333;
-        }
-        
-        .btn {
-            width: 100%;
-            padding: 15px;
-            margin-bottom: 20px;
-            background-color: white;
-            border: 2px solid #333;
+        .btn-login {
+            padding: 10px 25px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
             border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-login:hover {
+            background-color: #45a049;
+        }
+        
+        .hero-section {
+            background: linear-gradient(135deg, hsl(224, 92%, 58%) 0%, #4888f7 100%);
+            color: white;
+            text-align: center;
+            padding: 80px 20px;
+        }
+        
+        .hero-title {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        
+        .hero-subtitle {
+            font-size: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+        
+        .section-title {
+            font-size: 32px;
+            text-align: center;
+            margin-bottom: 40px;
+            color: #1882ed;
+        }
+        
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+        
+        .product-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .product-image {
+            width: 100%;
+            height: 200px;
+            object-fit: contain;
+            margin-bottom: 15px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+        }
+        
+        .product-name {
             font-size: 16px;
             font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s;
+            margin-bottom: 10px;
         }
         
-        .btn:hover {
-            background-color: #f0f0f0;
+        .product-price {
+            font-size: 18px;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+        
+        .categories-section {
+            background-color: #e8f4f8;
+            padding: 60px 40px;
+            border-radius: 10px;
+            margin-top: 60px;
+        }
+        
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .category-card {
+            background-color: white;
+            padding: 40px;
+            text-align: center;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .category-card:hover {
+            transform: scale(1.05);
+        }
+        
+        .category-image {
+            width: 100%;
+            height: 180px;
+            object-fit: contain;
+            margin-bottom: 15px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 60px;
+            font-size: 20px;
+        }
+
+        footer {
+            background-color: #2c3e50;
+            color: white;
+            padding: 40px;
+            margin-top: 80px;
+            text-align: center;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 40px;
+            text-align: left;
+        }
+
+        .footer-section h3 {
+            margin-bottom: 15px;
+        }
+
+        .footer-section a {
+            display: block;
+            color: #bbb;
+            text-decoration: none;
+            margin-bottom: 10px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-admin {
+            padding: 8px 20px;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-logout {
+            padding: 8px 20px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
         }
     </style>
 </head>
 <body>
     <header>
-        <h1>Vestis Store</h1>
+        <h1 onclick="window.location.reload()">Vestis Store</h1>
         <nav>
-            <a href="#">Home</a>
-            <input type="search" placeholder="Buscar productos">
-            <a href="#">Contacto</a>
+            <a href="#productos">Productos</a>
+            <input type="search" class="search-bar" placeholder="Buscar productos..." id="searchInput">
+            <a href="#contacto">Contacto</a>
             <span>🛒</span>
-            <span>👤</span>
+            
+            <div id="authButtons">
+                <button class="btn-login" onclick="window.location.href='login.html'">Iniciar Sesión</button>
+            </div>
+
+            <div id="userInfo" class="user-info" style="display: none;">
+                <span id="userEmail"></span>
+                <button class="btn-admin" onclick="window.location.href='productos.html'">Admin</button>
+                <button class="btn-logout" onclick="handleLogout()">Cerrar Sesión</button>
+            </div>
         </nav>
     </header>
 
-    <div class="overlay"></div>
-    
-    <div class="modal">
-        <div class="modal-header"></div>
-        <h2>BIENVENIDO</h2>
-        <button class="btn" onclick="window.location.href='login.html'">INICIAR SESION</button>
-        <button class="btn" onclick="window.location.href='registro.html'">REGISTRARSE</button>
+    <div class="hero-section">
+        <h1 class="hero-title">Bienvenido a Vestis Store</h1>
     </div>
 
-    <!-- Firebase SDK -->
+    <div class="container" id="productos">
+        <h2 class="section-title">Nuestros Productos</h2>
+        
+        <div id="loading" class="loading">Cargando productos...</div>
+        
+        <div id="productsContainer" style="display: none;">
+            <div class="products-grid" id="productsGrid"></div>
+        </div>
+
+        <div class="categories-section">
+            <h2 class="section-title">Categorías</h2>
+            <div class="categories-grid">
+                <div class="category-card">
+                    <img src="https://via.placeholder.com/200x180?text=Chaquetas" alt="Chaquetas" class="category-image">
+                    <h3>Chaquetas</h3>
+                </div>
+                <div class="category-card">
+                    <img src="https://via.placeholder.com/200x180?text=Pantalones" alt="Pantalones" class="category-image">
+                    <h3>Pantalones</h3>
+                </div>
+                <div class="category-card">
+                    <img src="https://via.placeholder.com/200x180?text=Camisas" alt="Camisas" class="category-image">
+                    <h3>Camisas</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer id="contacto">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Vestis Store</h3>
+                <p>Tu tienda de confianza</p>
+            </div>
+            <div class="footer-section">
+                <h3>Information</h3>
+                <a href="#">Sobre nosotros</a>
+                <a href="#">Productos</a>
+                <a href="#">Blog</a>
+            </div>
+            <div class="footer-section">
+                <h3>Company</h3>
+                <a href="#">Comunidad</a>
+                <a href="#">Carreras</a>
+                <a href="#">Nuestra historia</a>
+            </div>
+            <div class="footer-section">
+                <h3>Contacto</h3>
+                <a href="#">Soporte</a>
+                <a href="#">Precios</a>
+                <a href="#">Recursos</a>
+            </div>
+        </div>
+        <p style="margin-top: 30px; color: #bbb;">© 2024 Vestis Store. Todos los derechos reservados.</p>
+    </footer>
+
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getAuth } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, collection, getDocs, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
         const firebaseConfig = {
             apiKey: "AIzaSyD5Q8M7chlhNvLuVlUT9vwVYi2YeeFVgdw",
@@ -141,13 +331,105 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
+        const db = getFirestore(app);
 
-        // Verificar si ya hay sesión activa
-        auth.onAuthStateChanged((user) => {
+        let allProducts = [];
+
+        // Verificar si hay usuario logueado
+        onAuthStateChanged(auth, (user) => {
             if (user) {
-                window.location.href = 'home.html';
+                document.getElementById('authButtons').style.display = 'none';
+                document.getElementById('userInfo').style.display = 'flex';
+                document.getElementById('userEmail').textContent =  user.email;
+            } else {
+                document.getElementById('authButtons').style.display = 'block';
+                document.getElementById('userInfo').style.display = 'none';
             }
         });
+
+        // Cargar productos (público)
+        async function loadProducts() {
+            const loading = document.getElementById('loading');
+            const container = document.getElementById('productsContainer');
+            const grid = document.getElementById('productsGrid');
+
+            try {
+                const q = query(collection(db, 'productos'), orderBy('nombre'));
+                const querySnapshot = await getDocs(q);
+                
+                allProducts = [];
+                querySnapshot.forEach((doc) => {
+                    allProducts.push({ id: doc.id, ...doc.data() });
+                });
+
+                loading.style.display = 'none';
+                container.style.display = 'block';
+
+                if (allProducts.length === 0) {
+                    grid.innerHTML = '<p style="text-align: center; color: #666;">No hay productos disponibles por el momento.</p>';
+                } else {
+                    displayProducts(allProducts);
+                }
+            } catch (error) {
+                console.error('Error al cargar productos:', error);
+                loading.innerHTML = '<p style="color: #e74c3c;">Error al cargar productos. Por favor, recarga la página.</p>';
+            }
+        }
+
+        function displayProducts(products) {
+            const grid = document.getElementById('productsGrid');
+            grid.innerHTML = '';
+
+            products.forEach(product => {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.onclick = () => viewProduct(product.id);
+                
+                card.innerHTML = `
+                    <img src="${product.imagenUrl || 'https://via.placeholder.com/200?text=Sin+Imagen'}" 
+                         alt="${product.nombre}" 
+                         class="product-image"
+                         onerror="this.src='https://via.placeholder.com/200?text=Imagen+No+Disponible'">
+                    <div class="product-name">${product.nombre}</div>
+                    <div class="product-price">$${Number(product.precio).toLocaleString()}</div>
+                `;
+                
+                grid.appendChild(card);
+            });
+        }
+
+        function viewProduct(productId) {
+            // Si está logueado, va al detalle completo
+            // Si no, muestra info básica
+            if (auth.currentUser) {
+                window.location.href = `producto-detalle.html?id=${productId}`;
+            } else {
+                alert('Inicia sesión para ver más detalles del producto');
+                window.location.href = 'login.html';
+            }
+        }
+
+        window.handleLogout = async function() {
+            try {
+                await signOut(auth);
+                window.location.reload();
+            } catch (error) {
+                alert('Error al cerrar sesión');
+            }
+        };
+
+        // Búsqueda en tiempo real
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const filtered = allProducts.filter(p => 
+                p.nombre.toLowerCase().includes(searchTerm) ||
+                (p.genero && p.genero.toLowerCase().includes(searchTerm))
+            );
+            displayProducts(filtered);
+        });
+
+        // Cargar productos al iniciar
+        loadProducts();
     </script>
 </body>
 </html>

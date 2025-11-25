@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vestis Store - Login</title>
+    <title>Vestis Store - Login Seguro</title>
     <style>
         * {
             margin: 0;
@@ -25,7 +25,7 @@
             padding: 60px 80px;
             border-radius: 10px;
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-            min-width: 400px;
+            min-width: 450px;
         }
         
         h2 {
@@ -71,6 +71,11 @@
         .btn-primary:hover {
             background-color: #357ABD;
         }
+
+        .btn-primary:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
         
         .message {
             margin-bottom: 20px;
@@ -89,6 +94,11 @@
             background-color: #f8d7da;
             color: #721c24;
         }
+
+        .message.info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
         
         .back-link {
             margin-top: 20px;
@@ -96,11 +106,52 @@
         }
         
         .back-link a {
+            color: #4A90E2;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        .verification-section {
+            display: none;
+        }
+
+        .code-info {
+            background-color: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .code-input {
+            text-align: center;
+            font-size: 24px;
+            letter-spacing: 10px;
+            font-weight: bold;
+        }
+
+        .security-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            color: #28a745;
+        }
+
+        .resend-code {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .resend-code button {
             background: none;
             border: none;
             color: #4A90E2;
-            cursor: pointer;
             text-decoration: underline;
+            cursor: pointer;
+            font-size: 14px;
         }
     </style>
 </head>
@@ -108,29 +159,55 @@
     <div class="login-container">
         <h2>LOGIN</h2>
         
+        <div class="security-badge">
+        </div>
+
         <div id="message" class="message"></div>
         
-        <div class="form-group">
-            <label>USUARIO</label>
-            <input type="email" id="email" placeholder="correo@ejemplo.com" required>
+        <!-- PASO 1: Email y Contraseña -->
+        <div id="loginStep">
+            <div class="form-group">
+                <label>USUARIO</label>
+                <input type="email" id="email" placeholder="correo@ejemplo.com" required>
+            </div>
+            
+            <div class="form-group">
+                <label>CONTRASEÑA</label>
+                <input type="password" id="password" placeholder="••••••••" required>
+            </div>
+            
+            <button class="btn-primary" id="btnLogin" onclick="handleLogin()">ENTRAR</button>
         </div>
-        
-        <div class="form-group">
-            <label>CONTRASEÑA</label>
-            <input type="password" id="password" placeholder="••••••••" required>
+
+        <!-- PASO 2: Verificación de código -->
+        <div id="verificationStep" class="verification-section">
+            <div class="code-info">
+                <p><strong>📧 Código enviado a tu correo</strong></p>
+                <p style="font-size: 12px; margin-top: 5px;">Revisa tu bandeja de entrada y spam</p>
+            </div>
+
+            <div class="form-group">
+                <label>CÓDIGO DE VERIFICACIÓN</label>
+                <input type="text" id="verificationCode" class="code-input" maxlength="6" placeholder="000000" required>
+            </div>
+            
+            <button class="btn-primary" onclick="verifyCode()">VERIFICAR CÓDIGO</button>
+
+            <div class="resend-code">
+                <p style="font-size: 12px; color: #666; margin-bottom: 5px;">¿No recibiste el código?</p>
+                <button onclick="resendCode()">Reenviar código</button>
+            </div>
         </div>
-        
-        <button class="btn-primary" onclick="handleLogin()">ENTRAR</button>
         
         <div class="back-link">
-            <a href="index.html">Volver</a>
+            <a href="index.html">← Volver al inicio</a>
         </div>
     </div>
 
-    <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, doc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
         const firebaseConfig = {
             apiKey: "AIzaSyD5Q8M7chlhNvLuVlUT9vwVYi2YeeFVgdw",
@@ -144,19 +221,22 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
+        const db = getFirestore(app);
 
-        // Verificar si ya hay sesión activa
+        let currentUser = null;
+        let generatedCode = null;
+
         onAuthStateChanged(auth, (user) => {
-            if (user) {
+            if (user && sessionStorage.getItem('2faVerified') === 'true') {
                 window.location.href = 'home.html';
             }
         });
 
-        // Hacer la función global
         window.handleLogin = async function() {
-            const email = document.getElementById('email').value;
+            const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
             const messageDiv = document.getElementById('message');
+            const btnLogin = document.getElementById('btnLogin');
             
             messageDiv.style.display = 'none';
             
@@ -165,13 +245,39 @@
                 return;
             }
             
+            btnLogin.disabled = true;
+            btnLogin.textContent = 'VERIFICANDO...';
+            
             try {
-                await signInWithEmailAndPassword(auth, email, password);
-                showMessage('¡Inicio de sesión exitoso!', 'success');
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                currentUser = userCredential.user;
+                
+                // Generar código de 6 dígitos
+                generatedCode = Math.floor(100000 + Math.random() * 900000).toString();
+                
+                // Guardar código temporalmente en Firestore
+                await setDoc(doc(db, 'verificacion2fa', currentUser.uid), {
+                    codigo: generatedCode,
+                    timestamp: new Date().toISOString(),
+                    email: email
+                });
+                
+                showMessage('✅ Credenciales correctas. Código enviado a tu correo.', 'success');
+                
+                // Mostrar paso de verificación
                 setTimeout(() => {
-                    window.location.href = 'home.html';
+                    document.getElementById('loginStep').style.display = 'none';
+                    document.getElementById('verificationStep').style.display = 'block';
+                    
+                    // SIMULACIÓN: Mostrar código en consola (en producción se enviaría por email)
+                    console.log('🔐 CÓDIGO DE VERIFICACIÓN:', generatedCode);
+                    showMessage(`📱 DEMO: Tu código es ${generatedCode} (revisa la consola)`, 'info');
                 }, 1000);
+                
             } catch (error) {
+                btnLogin.disabled = false;
+                btnLogin.textContent = 'ENTRAR';
+                
                 let errorMessage = 'Error al iniciar sesión';
                 
                 if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') {
@@ -188,6 +294,56 @@
             }
         };
 
+        window.verifyCode = async function() {
+            const inputCode = document.getElementById('verificationCode').value.trim();
+            
+            if (inputCode.length !== 6) {
+                showMessage('El código debe tener 6 dígitos', 'error');
+                return;
+            }
+
+            try {
+                // Verificar código
+                const docRef = doc(db, 'verificacion2fa', currentUser.uid);
+                const docSnap = await getDoc(docRef);
+                
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    
+                    if (data.codigo === inputCode) {
+                        // Código correcto
+                        sessionStorage.setItem('2faVerified', 'true');
+                        showMessage('✅ Verificación exitosa. Redirigiendo...', 'success');
+                        
+                        setTimeout(() => {
+                            window.location.href = 'home.html';
+                        }, 1000);
+                    } else {
+                        showMessage('❌ Código incorrecto. Intenta de nuevo.', 'error');
+                    }
+                } else {
+                    showMessage('Error: No se encontró el código de verificación', 'error');
+                }
+            } catch (error) {
+                showMessage('Error al verificar código: ' + error.message, 'error');
+            }
+        };
+
+        window.resendCode = async function() {
+            if (!currentUser) return;
+            
+            // Generar nuevo código
+            generatedCode = Math.floor(100000 + Math.random() * 900000).toString();
+            
+            await setDoc(doc(db, 'verificacion2fa', currentUser.uid), {
+                codigo: generatedCode,
+                timestamp: new Date().toISOString()
+            });
+            
+            console.log('🔐 NUEVO CÓDIGO:', generatedCode);
+            showMessage(`📱 Código reenviado: ${generatedCode}`, 'info');
+        };
+
         function showMessage(text, type) {
             const messageDiv = document.getElementById('message');
             messageDiv.textContent = text;
@@ -195,10 +351,14 @@
             messageDiv.style.display = 'block';
         }
 
-        // Permitir login con Enter
+        // Permitir enviar con Enter
         document.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
-                window.handleLogin();
+                if (document.getElementById('loginStep').style.display !== 'none') {
+                    window.handleLogin();
+                } else {
+                    window.verifyCode();
+                }
             }
         });
     </script>
