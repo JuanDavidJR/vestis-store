@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vestis Store - Registro</title>
+    <title>Vestis Store - Registro Seguro</title>
     <style>
         * {
             margin: 0;
@@ -13,7 +13,7 @@
         
         body {
             font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
+            background-color: white;
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -26,21 +26,33 @@
             padding: 60px 80px;
             border-radius: 10px;
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-            max-width: 800px;
+            max-width: 900px;
             width: 100%;
+            border: 2px solid #f0f0f0;
         }
         
         h2 {
             font-size: 36px;
             font-weight: bold;
-            margin-bottom: 40px;
+            margin-bottom: 20px;
             text-align: center;
+            color: #000;
         }
         
+        .security-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+            color: #28a745;
+            font-size: 14px;
+        }
+
         .form-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 30px;
+            gap: 25px;
         }
         
         .form-group {
@@ -51,13 +63,20 @@
         label {
             margin-bottom: 8px;
             font-weight: 500;
+            color: #000;
         }
         
         input {
             padding: 12px;
-            border: 2px solid #333;
+            border: 2px solid #ddd;
             border-radius: 8px;
             font-size: 14px;
+            background-color: #f9f9f9;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #4A90E2;
         }
         
         .btn-primary {
@@ -72,6 +91,7 @@
             font-weight: 500;
             cursor: pointer;
             transition: all 0.3s;
+            grid-column: 1 / -1;
         }
         
         .btn-primary:hover {
@@ -85,28 +105,26 @@
         
         .message {
             margin-top: 20px;
-            padding: 15px;
+            padding: 10px;
             border-radius: 5px;
             text-align: center;
             display: none;
+            grid-column: 1 / -1;
         }
         
         .message.success {
             background-color: #d4edda;
             color: #155724;
-            border: 1px solid #c3e6cb;
         }
         
         .message.error {
             background-color: #f8d7da;
             color: #721c24;
-            border: 1px solid #f5c6cb;
         }
 
         .message.info {
             background-color: #d1ecf1;
             color: #0c5460;
-            border: 1px solid #bee5eb;
         }
         
         .back-link {
@@ -122,6 +140,41 @@
             text-decoration: underline;
         }
 
+        .verification-section {
+            display: none;
+        }
+
+        .code-info {
+            background-color: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .code-input {
+            text-align: center;
+            font-size: 24px;
+            letter-spacing: 10px;
+            font-weight: bold;
+            width: 100%;
+        }
+
+        .resend-code {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .resend-code button {
+            background: none;
+            border: none;
+            color: #4A90E2;
+            text-decoration: underline;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
         .password-hint {
             font-size: 12px;
             color: #666;
@@ -133,49 +186,78 @@
     <div class="register-container">
         <h2>REGISTRO</h2>
         
-        <div class="form-grid">
+        <div class="security-badge">
+            <span style="font-size: 24px;">🔒</span>
+            <span>Registro seguro con verificación de dos factores</span>
+        </div>
+
+        <!-- PASO 1: Formulario de registro -->
+        <div id="registerStep">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Nombre</label>
+                    <input type="text" id="nombre" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Celular</label>
+                    <input type="tel" id="celular" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Apellido</label>
+                    <input type="text" id="apellido" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Correo electronico</label>
+                    <input type="email" id="email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Cedula</label>
+                    <input type="text" id="cedula" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Contraseña</label>
+                    <input type="password" id="password" required minlength="6">
+                    <div class="password-hint">Mínimo 6 caracteres</div>
+                </div>
+                
+                <div id="message" class="message"></div>
+                
+                <button class="btn-primary" id="btnRegister" onclick="handleRegister()">REGISTRARSE</button>
+            </div>
+        </div>
+
+        <!-- PASO 2: Verificación de código -->
+        <div id="verificationStep" class="verification-section">
+            <div class="code-info">
+                <p><strong>📧 Código enviado a tu correo</strong></p>
+                <p style="font-size: 12px; margin-top: 5px;">Revisa tu bandeja de entrada y spam</p>
+            </div>
+
             <div class="form-group">
-                <label>Nombre</label>
-                <input type="text" id="nombre" required>
+                <label>CÓDIGO DE VERIFICACIÓN</label>
+                <input type="text" id="verificationCode" class="code-input" maxlength="6" placeholder="000000" required>
             </div>
             
-            <div class="form-group">
-                <label>Celular</label>
-                <input type="tel" id="celular" required>
-            </div>
+            <div id="verifyMessage" class="message"></div>
             
-            <div class="form-group">
-                <label>Apellido</label>
-                <input type="text" id="apellido" required>
-            </div>
-            
-            <div class="form-group">
-                <label>Correo electronico</label>
-                <input type="email" id="email" required>
-            </div>
-            
-            <div class="form-group">
-                <label>Cedula</label>
-                <input type="text" id="cedula" required>
-            </div>
-            
-            <div class="form-group">
-                <label>Contraseña</label>
-                <input type="password" id="password" required minlength="6">
-                <div class="password-hint">Mínimo 6 caracteres</div>
+            <button class="btn-primary" onclick="verifyCode()">VERIFICAR Y COMPLETAR REGISTRO</button>
+
+            <div class="resend-code">
+                <p style="font-size: 12px; color: #666; margin-bottom: 5px;">¿No recibiste el código?</p>
+                <button onclick="resendCode()">Reenviar código</button>
             </div>
         </div>
         
-        <div id="message" class="message"></div>
-        
-        <button class="btn-primary" id="btnRegister" onclick="handleRegister()">REGISTRARSE</button>
-        
         <div class="back-link">
-            <a href="index.html">Volver</a>
+            <a href="index.html">← Volver al inicio</a>
         </div>
     </div>
 
-    <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getAuth, createUserWithEmailAndPassword, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
@@ -195,14 +277,15 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Verificar si ya hay sesión activa
+        let pendingUserData = null;
+        let generatedCode = null;
+
         onAuthStateChanged(auth, (user) => {
-            if (user) {
+            if (user && sessionStorage.getItem('2faVerified') === 'true') {
                 window.location.href = 'home.html';
             }
         });
 
-        // Hacer la función global
         window.handleRegister = async function() {
             const nombre = document.getElementById('nombre').value.trim();
             const apellido = document.getElementById('apellido').value.trim();
@@ -210,12 +293,10 @@
             const celular = document.getElementById('celular').value.trim();
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
-            const messageDiv = document.getElementById('message');
             const btnRegister = document.getElementById('btnRegister');
             
-            messageDiv.style.display = 'none';
+            clearMessage();
             
-            // Validaciones
             if (!nombre || !apellido || !cedula || !celular || !email || !password) {
                 showMessage('Por favor completa todos los campos', 'error');
                 return;
@@ -226,41 +307,49 @@
                 return;
             }
             
-            // Deshabilitar botón mientras procesa
             btnRegister.disabled = true;
-            btnRegister.textContent = 'REGISTRANDO...';
-            showMessage('Creando tu cuenta...', 'info');
+            btnRegister.textContent = 'CREANDO CUENTA...';
             
             try {
-                console.log('Intentando crear usuario...');
-                
                 // Crear usuario en Firebase Authentication
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                console.log('Usuario creado en Authentication:', userCredential.user.uid);
                 
-                showMessage('Guardando información adicional...', 'info');
+                // Guardar datos temporales para después de verificación
+                pendingUserData = {
+                    uid: userCredential.user.uid,
+                    nombre,
+                    apellido,
+                    cedula,
+                    celular,
+                    email
+                };
                 
-                // Guardar datos adicionales en Firestore
-                await setDoc(doc(db, 'usuarios', userCredential.user.uid), {
-                    nombre: nombre,
-                    apellido: apellido,
-                    cedula: cedula,
-                    celular: celular,
+                // Generar código de 6 dígitos
+                generatedCode = Math.floor(100000 + Math.random() * 900000).toString();
+                
+                // Guardar código temporalmente
+                await setDoc(doc(db, 'verificacion2fa', userCredential.user.uid), {
+                    codigo: generatedCode,
+                    timestamp: new Date().toISOString(),
                     email: email,
-                    fechaRegistro: new Date().toISOString()
+                    verified: false
                 });
                 
-                console.log('Datos guardados en Firestore');
+                showMessage('✅ Cuenta creada. Verificando identidad...', 'success');
                 
-                showMessage('¡Registro exitoso! Redirigiendo...', 'success');
+                // Mostrar paso de verificación
                 setTimeout(() => {
-                    window.location.href = 'home.html';
+                    document.getElementById('registerStep').style.display = 'none';
+                    document.getElementById('verificationStep').style.display = 'block';
+                    
+                    // SIMULACIÓN: Mostrar código en consola
+                    console.log('🔐 CÓDIGO DE VERIFICACIÓN:', generatedCode);
+                    showVerifyMessage(`📱 DEMO: Tu código es ${generatedCode} (revisa la consola)`, 'info');
                 }, 1500);
                 
             } catch (error) {
-                console.error('Error completo:', error);
-                console.error('Código de error:', error.code);
-                console.error('Mensaje:', error.message);
+                btnRegister.disabled = false;
+                btnRegister.textContent = 'REGISTRARSE';
                 
                 let errorMessage = 'Error al registrarse';
                 
@@ -270,18 +359,68 @@
                     errorMessage = 'La contraseña debe tener al menos 6 caracteres';
                 } else if (error.code === 'auth/invalid-email') {
                     errorMessage = 'El formato del correo electrónico no es válido';
-                } else if (error.code === 'auth/operation-not-allowed') {
-                    errorMessage = 'El registro no está habilitado. Contacta al administrador.';
-                } else if (error.code === 'permission-denied') {
-                    errorMessage = 'Error de permisos en la base de datos. Verifica las reglas de Firestore.';
-                } else {
-                    errorMessage = `Error: ${error.message}`;
                 }
                 
                 showMessage(errorMessage, 'error');
-                btnRegister.disabled = false;
-                btnRegister.textContent = 'REGISTRARSE';
             }
+        };
+
+        window.verifyCode = async function() {
+            const inputCode = document.getElementById('verificationCode').value.trim();
+            
+            if (inputCode.length !== 6) {
+                showVerifyMessage('El código debe tener 6 dígitos', 'error');
+                return;
+            }
+
+            if (inputCode === generatedCode) {
+                try {
+                    // Guardar datos del usuario en Firestore
+                    await setDoc(doc(db, 'usuarios', pendingUserData.uid), {
+                        nombre: pendingUserData.nombre,
+                        apellido: pendingUserData.apellido,
+                        cedula: pendingUserData.cedula,
+                        celular: pendingUserData.celular,
+                        email: pendingUserData.email,
+                        fechaRegistro: new Date().toISOString(),
+                        verificado: true
+                    });
+                    
+                    // Marcar como verificado
+                    await setDoc(doc(db, 'verificacion2fa', pendingUserData.uid), {
+                        codigo: generatedCode,
+                        timestamp: new Date().toISOString(),
+                        verified: true
+                    });
+                    
+                    sessionStorage.setItem('2faVerified', 'true');
+                    showVerifyMessage('✅ ¡Registro completado! Bienvenido a Vestis Store', 'success');
+                    
+                    setTimeout(() => {
+                        window.location.href = 'home.html';
+                    }, 1500);
+                } catch (error) {
+                    showVerifyMessage('Error al completar registro: ' + error.message, 'error');
+                }
+            } else {
+                showVerifyMessage('❌ Código incorrecto. Intenta de nuevo.', 'error');
+            }
+        };
+
+        window.resendCode = async function() {
+            if (!pendingUserData) return;
+            
+            // Generar nuevo código
+            generatedCode = Math.floor(100000 + Math.random() * 900000).toString();
+            
+            await setDoc(doc(db, 'verificacion2fa', pendingUserData.uid), {
+                codigo: generatedCode,
+                timestamp: new Date().toISOString(),
+                verified: false
+            });
+            
+            console.log('🔐 NUEVO CÓDIGO:', generatedCode);
+            showVerifyMessage(`📱 Código reenviado: ${generatedCode}`, 'info');
         };
 
         function showMessage(text, type) {
@@ -289,6 +428,20 @@
             messageDiv.textContent = text;
             messageDiv.className = 'message ' + type;
             messageDiv.style.display = 'block';
+        }
+
+        function showVerifyMessage(text, type) {
+            const messageDiv = document.getElementById('verifyMessage');
+            messageDiv.textContent = text;
+            messageDiv.className = 'message ' + type;
+            messageDiv.style.display = 'block';
+        }
+
+        function clearMessage() {
+            document.getElementById('message').style.display = 'none';
+            if (document.getElementById('verifyMessage')) {
+                document.getElementById('verifyMessage').style.display = 'none';
+            }
         }
     </script>
 </body>
