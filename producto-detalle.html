@@ -58,12 +58,14 @@
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
         }
         
-        .product-detail {
-            display: grid;
-            grid-template-columns: 1fr 1.5fr;
-            gap: 60px;
-        }
-        
+      .product-detail {
+    display: flex;
+    flex-direction: column;
+    align-items: center;      /* ✅ Centra todo horizontalmente */
+    text-align: center;       /* ✅ Centra textos */
+    gap: 25px;
+}
+
         .product-image-section {
             text-align: center;
         }

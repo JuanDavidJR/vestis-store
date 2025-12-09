@@ -217,7 +217,10 @@
 
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import {   getAuth,
+    signInWithEmailAndPassword,
+    onAuthStateChanged,
+    signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
         import { getFirestore, doc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
         const firebaseConfig = {
@@ -237,73 +240,84 @@
         let currentUser = null;
         let generatedCode = null;
 
-        onAuthStateChanged(auth, (user) => {
-            if (user && sessionStorage.getItem('2faVerified') === 'true') {
-                window.location.href = 'home.html';
-            }
-        });
+     onAuthStateChanged(auth, (user) => {
+    // Si ya está logueado y verificado, podrías redirigir directo:
+    // if (user && user.emailVerified) {
+    //     window.location.href = 'home.html';
+    // }
+});
+
 
         window.handleLogin = async function() {
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value;
-            const messageDiv = document.getElementById('message');
-            const btnLogin = document.getElementById('btnLogin');
-            
-            messageDiv.style.display = 'none';
-            
-            if (!email || !password) {
-                showMessage('Por favor completa todos los campos', 'error');
-                return;
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const messageDiv = document.getElementById('message');
+    const btnLogin = document.getElementById('btnLogin');
+
+    messageDiv.style.display = 'none';
+
+    if (!email || !password) {
+        showMessage('Por favor completa todos los campos', 'error');
+        return;
+    }
+
+    btnLogin.disabled = true;
+    btnLogin.textContent = 'ENTRANDO...';
+
+    try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        // 1️⃣ Verificar si el correo está verificado
+        if (!user.emailVerified) {
+            await signOut(auth);
+            showMessage('Debes verificar tu correo antes de entrar. Revisa tu bandeja de entrada.', 'error');
+            btnLogin.disabled = false;
+            btnLogin.textContent = 'ENTRAR';
+            return;
+        }
+
+        // 2️⃣ Cargar rol del usuario desde Firestore
+        let userRole = 'cliente';
+        try {
+            const userDocRef = doc(db, 'usuarios', user.uid);
+            const userDocSnap = await getDoc(userDocRef);
+
+            if (userDocSnap.exists()) {
+                const data = userDocSnap.data();
+                userRole = data.tipoUsuario || 'cliente';
             }
-            
-            btnLogin.disabled = true;
-            btnLogin.textContent = 'VERIFICANDO...';
-            
-            try {
-                const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                currentUser = userCredential.user;
-                
-                // Generar código de 6 dígitos
-                generatedCode = Math.floor(100000 + Math.random() * 900000).toString();
-                
-                // Guardar código temporalmente en Firestore
-                await setDoc(doc(db, 'verificacion2fa', currentUser.uid), {
-                    codigo: generatedCode,
-                    timestamp: new Date().toISOString(),
-                    email: email
-                });
-                
-                showMessage('✅ Credenciales correctas. Código enviado a tu correo.', 'success');
-                
-                // Mostrar paso de verificación
-                setTimeout(() => {
-                    document.getElementById('loginStep').style.display = 'none';
-                    document.getElementById('verificationStep').style.display = 'block';
-                    
-                    // SIMULACIÓN: Mostrar código en consola (en producción se enviaría por email)
-                    console.log('🔐 CÓDIGO DE VERIFICACIÓN:', generatedCode);
-                    showMessage(`📱 DEMO: Tu código es ${generatedCode} (revisa la consola)`, 'info');
-                }, 1000);
-                
-            } catch (error) {
-                btnLogin.disabled = false;
-                btnLogin.textContent = 'ENTRAR';
-                
-                let errorMessage = 'Error al iniciar sesión';
-                
-                if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') {
-                    errorMessage = 'Usuario o contraseña incorrectos';
-                } else if (error.code === 'auth/user-not-found') {
-                    errorMessage = 'Usuario no encontrado';
-                } else if (error.code === 'auth/invalid-email') {
-                    errorMessage = 'Correo electrónico inválido';
-                } else if (error.code === 'auth/too-many-requests') {
-                    errorMessage = 'Demasiados intentos. Intenta más tarde';
-                }
-                
-                showMessage(errorMessage, 'error');
-            }
-        };
+        } catch (e) {
+            console.error('Error obteniendo rol:', e);
+        }
+
+        // Guardar rol en sessionStorage para usarlo en las demás páginas
+        sessionStorage.setItem('userRole', userRole);
+
+        showMessage('✅ Inicio de sesión correcto. Redirigiendo...', 'success');
+
+        setTimeout(() => {
+            window.location.href = 'index.html';
+        }, 1000);
+
+    } catch (error) {
+        console.error(error);
+        btnLogin.disabled = false;
+        btnLogin.textContent = 'ENTRAR';
+
+        let errorMessage = 'Error al iniciar sesión';
+
+        if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') {
+            errorMessage = 'Usuario o contraseña incorrectos';
+        } else if (error.code === 'auth/user-not-found') {
+            errorMessage = 'Usuario no encontrado';
+        } else if (error.code === 'auth/invalid-email') {
+            errorMessage = 'El formato del correo electrónico no es válido';
+        }
+
+        showMessage(errorMessage, 'error');
+    }
+};
 
         window.verifyCode = async function() {
             const inputCode = document.getElementById('verificationCode').value.trim();
