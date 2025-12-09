@@ -186,15 +186,25 @@
             color: #333;
         }
         
-        .btn-back {
-            display: inline-block;
-            margin-top: 30px;
-            padding: 12px 30px;
-            background-color: #6c757d;
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-        }
+     /* Cabecera del detalle (fila para el botón de volver) */
+.detail-header {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 20px;
+}
+
+/* Estilo del link de volver */
+.back-link {
+    font-size: 14px;
+    color: #444;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.back-link:hover {
+    text-decoration: underline;
+}
+
         
         .loading {
             text-align: center;
@@ -210,28 +220,36 @@
             <a href="productos.html">Home</a>
             <input type="search" class="search-bar" placeholder="Buscar productos.....">
             <a href="#">Contacto</a>
-            <button class="btn-add" onclick="window.location.href='producto-form.html'" style="background-color: #4CAF50; color: white; border: none; padding: 10px 15px; border-radius: 50%; cursor: pointer; font-size: 20px;">+</button>
-            <span>🛒</span>
-            <span>👤</span>
+<button id="btnAddProductDetalle"
+        class="btn-add"
+        onclick="window.location.href='producto-form.html'"
+        style="display: none; background-color: #4CAF50; color: white; border: none; padding: 10px 15px; border-radius: 50%; cursor: pointer; font-size: 20px;">
+    +
+</button>
+<span id="userEmail">👤</span>
+<span>🛒</span>
+
+
         </nav>
     </header>
 
     <div class="container">
+
+            <div class="detail-header">
+        <a href="productos.html" class="back-link">← Volver a productos</a>
+    </div>
         <div id="loading" class="loading">Cargando producto...</div>
         
         <div id="productDetail" style="display: none;">
             <div class="product-detail">
                 <div class="product-image-section">
                     <img id="productImage" src="" alt="Producto" class="product-image">
-                    <div class="product-actions">
-                        <button class="btn-action btn-update" onclick="editProduct()" title="Actualizar">
-                            🔄
-                        </button>
-                        <button class="btn-action btn-delete" onclick="deleteProduct()" title="Eliminar">
-                            🗑️
-                        </button>
-                    </div>
-                </div>
+                    <div class="product-actions" id="adminProductActions" style="display: none;">
+    <button class="btn-action btn-update" onclick="editProduct()" title="Actualizar">🔄</button>
+    <button class="btn-action btn-delete" onclick="deleteProduct()" title="Eliminar">🗑️</button>
+</div>
+
+
                 
                 <div class="product-info">
                     <h1 class="product-title" id="productName"></h1>
@@ -277,7 +295,8 @@
                 </div>
             </div>
             
-            <a href="productos.html" class="btn-back">← Volver a productos</a>
+</div>
+
         </div>
     </div>
 
@@ -296,27 +315,54 @@
             appId: "1:772191597035:web:d6581633f495e7b7b669ae"
         };
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-        let currentProductId = null;
-        let currentProduct = null;
+let currentProductId = null;
+let currentProduct = null;
 
-        onAuthStateChanged(auth, async (user) => {
-            if (!user) {
-                window.location.href = 'index.html';
-            } else {
-                const urlParams = new URLSearchParams(window.location.search);
-                currentProductId = urlParams.get('id');
-                
-                if (currentProductId) {
-                    await loadProduct(currentProductId);
-                } else {
-                    window.location.href = 'productos.html';
-                }
+onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+        window.location.href = 'index.html';
+        return;
+    }
+
+    const userEmailSpan = document.getElementById('userEmail');
+    if (userEmailSpan) userEmailSpan.textContent = '👤 ' + user.email;
+
+    try {
+        const userDocRef = doc(db, 'usuarios', user.uid);
+        const userDocSnap = await getDoc(userDocRef);
+
+        if (userDocSnap.exists()) {
+            const userData = userDocSnap.data();
+            console.log('tipoUsuario (detalle):', userData.tipoUsuario);
+
+            if (userData.tipoUsuario === 'admin') {
+                const btnAdd = document.getElementById('btnAddProductDetalle');
+                if (btnAdd) btnAdd.style.display = 'flex';
+
+                const adminActions = document.getElementById('adminProductActions');
+                if (adminActions) adminActions.style.display = 'flex';
             }
-        });
+        }
+    } catch (e) {
+        console.error('Error obteniendo usuario en detalle:', e);
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    currentProductId = urlParams.get('id');
+
+    if (currentProductId) {
+        await loadProduct(currentProductId);
+    } else {
+        window.location.href = 'productos.html';
+    }
+});
+
+
+
 
         async function loadProduct(productId) {
             const loading = document.getElementById('loading');
