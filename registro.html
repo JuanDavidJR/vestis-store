@@ -224,6 +224,14 @@
                     <input type="password" id="password" required minlength="6">
                     <div class="password-hint">Mínimo 6 caracteres</div>
                 </div>
+
+                <div class="form-group">
+                    <label>Tipo de Usuario</label>
+                    <select id="tipoUsuario" style="padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 14px; background-color: #f9f9f9; width: 100%;">
+                        <option value="cliente">Cliente</option>
+                        <option value="admin">Administrador</option>
+                    </select>
+                </div>
                 
                 <div id="message" class="message"></div>
                 
@@ -293,6 +301,7 @@
             const celular = document.getElementById('celular').value.trim();
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
+            const tipoUsuario = document.getElementById('tipoUsuario').value;
             const btnRegister = document.getElementById('btnRegister');
             
             clearMessage();
@@ -321,7 +330,8 @@
                     apellido,
                     cedula,
                     celular,
-                    email
+                    email,
+                    tipoUsuario
                 };
                 
                 // Generar código de 6 dígitos
@@ -382,6 +392,7 @@
                         cedula: pendingUserData.cedula,
                         celular: pendingUserData.celular,
                         email: pendingUserData.email,
+                        tipoUsuario: pendingUserData.tipoUsuario,
                         fechaRegistro: new Date().toISOString(),
                         verificado: true
                     });
@@ -394,10 +405,17 @@
                     });
                     
                     sessionStorage.setItem('2faVerified', 'true');
+                    sessionStorage.setItem('userRole', pendingUserData.tipoUsuario);
                     showVerifyMessage('✅ ¡Registro completado! Bienvenido a Vestis Store', 'success');
                     
                     setTimeout(() => {
-                        window.location.href = 'home.html';
+                        if (pendingUserData.tipoUsuario === 'admin') {
+                            window.location.href = 'admin-dashboard.html';
+                        } else {
+                            // Usuario normal va a la tienda pública
+                            localStorage.removeItem('cart'); // Limpiar carrito si existe
+                            window.location.href = 'index.html';
+                        }
                     }, 1500);
                 } catch (error) {
                     showVerifyMessage('Error al completar registro: ' + error.message, 'error');

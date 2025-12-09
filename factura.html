@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Factura - Vestis Store</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            padding: 40px 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 60px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 3px solid #4CAF50;
+        }
+        
+        .header h1 {
+            font-size: 36px;
+            margin-bottom: 10px;
+            color: #000;
+        }
+        
+        .header .subtitle {
+            font-size: 18px;
+            color: #666;
+        }
+        
+        .success-icon {
+            font-size: 80px;
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+        
+        .invoice-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .info-section h3 {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+        
+        .info-section p {
+            font-size: 16px;
+            color: #000;
+            margin-bottom: 5px;
+        }
+        
+        .products-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+        
+        .products-table th {
+            background-color: #f5f5f5;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #ddd;
+        }
+        
+        .products-table td {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .product-name {
+            font-weight: 500;
+        }
+        
+        .totals {
+            margin-left: auto;
+            width: 300px;
+        }
+        
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            font-size: 16px;
+        }
+        
+        .total-row.final {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4CAF50;
+            padding-top: 15px;
+            border-top: 2px solid #ddd;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 40px;
+        }
+        
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-print {
+            background-color: #2196F3;
+            color: white;
+        }
+        
+        .btn-home {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        @media print {
+            body {
+                background-color: white;
+                padding: 0;
+            }
+            .actions {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="success-icon">✅</div>
+            <h1>¡Compra Exitosa!</h1>
+            <p class="subtitle">Gracias por tu compra en Vestis Store</p>
+        </div>
+
+        <div class="invoice-info">
+            <div class="info-section">
+                <h3>Información del Cliente</h3>
+                <p id="customerName">Nombre del Cliente</p>
+                <p id="customerEmail">email@ejemplo.com</p>
+            </div>
+            
+            <div class="info-section">
+                <h3>Detalles de la Factura</h3>
+                <p><strong>Factura #:</strong> <span id="invoiceNumber">-</span></p>
+                <p><strong>Fecha:</strong> <span id="invoiceDate">-</span></p>
+                <p><strong>Estado:</strong> <span style="color: #4CAF50; font-weight: bold;">PAGADO</span></p>
+            </div>
+        </div>
+
+        <h3 style="margin-bottom: 15px;">Productos</h3>
+        <table class="products-table">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Cantidad</th>
+                    <th>Precio Unit.</th>
+                    <th>Subtotal</th>
+                </tr>
+            </thead>
+            <tbody id="productsTableBody">
+            </tbody>
+        </table>
+
+        <div class="totals">
+            <div class="total-row">
+                <span>Subtotal:</span>
+                <span id="subtotalAmount">$0</span>
+            </div>
+            <div class="total-row">
+                <span>Envío:</span>
+                <span id="shippingAmount">$15,000</span>
+            </div>
+            <div class="total-row final">
+                <span>Total:</span>
+                <span id="totalAmount">$0</span>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button class="btn btn-print" onclick="window.print()">🖨️ Imprimir Factura</button>
+            <a href="index.html" class="btn btn-home" onclick="clearCart()">🏠 Volver a la Tienda</a>
+        </div>
+
+        <div class="footer">
+            <p><strong>Vestis Store</strong></p>
+            <p>Gracias por confiar en nosotros</p>
+            <p>Para cualquier consulta: soporte@vestisstore.com</p>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD5Q8M7chlhNvLuVlUT9vwVYi2YeeFVgdw",
+            authDomain: "vestis-store.firebaseapp.com",
+            databaseURL: "https://vestis-store-default-rtdb.firebaseio.com",
+            projectId: "vestis-store",
+            storageBucket: "vestis-store.firebasestorage.app",
+            messagingSenderId: "772191597035",
+            appId: "1:772191597035:web:d6581633f495e7b7b669ae"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                alert('Debes iniciar sesión');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const ventaId = urlParams.get('id');
+
+            if (!ventaId) {
+                alert('Factura no encontrada');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            await loadInvoice(ventaId, user);
+        });
+
+        async function loadInvoice(ventaId, user) {
+            try {
+                const ventaDoc = await getDoc(doc(db, 'ventas', ventaId));
+                
+                if (!ventaDoc.exists()) {
+                    alert('Factura no encontrada');
+                    window.location.href = 'index.html';
+                    return;
+                }
+
+                const venta = ventaDoc.data();
+
+                // Información del cliente
+                const userDoc = await getDoc(doc(db, 'usuarios', user.uid));
+                if (userDoc.exists()) {
+                    const userData = userDoc.data();
+                    document.getElementById('customerName').textContent = `${userData.nombre} ${userData.apellido}`;
+                }
+                document.getElementById('customerEmail').textContent = user.email;
+
+                // Información de la factura
+                document.getElementById('invoiceNumber').textContent = ventaId.substring(0, 8).toUpperCase();
+                const fecha = new Date(venta.fecha);
+                document.getElementById('invoiceDate').textContent = fecha.toLocaleDateString('es-CO', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+
+                // Productos
+                const tbody = document.getElementById('productsTableBody');
+                venta.productos.forEach(producto => {
+                    const subtotal = producto.precio * producto.cantidad;
+                    const row = tbody.insertRow();
+                    row.innerHTML = `
+                        <td class="product-name">${producto.nombre}</td>
+                        <td>${producto.cantidad}</td>
+                        <td>$${producto.precio.toLocaleString()}</td>
+                        <td>$${subtotal.toLocaleString()}</td>
+                    `;
+                });
+
+                // Totales
+                document.getElementById('subtotalAmount').textContent = '$' + venta.subtotal.toLocaleString();
+                document.getElementById('shippingAmount').textContent = '$' + venta.envio.toLocaleString();
+                document.getElementById('totalAmount').textContent = '$' + venta.total.toLocaleString();
+
+            } catch (error) {
+                console.error('Error al cargar factura:', error);
+                alert('Error al cargar la factura');
+            }
+        }
+
+        window.clearCart = function() {
+            localStorage.removeItem('cart');
+        };
+    </script>
+</body>
+</html>

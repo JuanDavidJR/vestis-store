@@ -322,12 +322,25 @@
                     const data = docSnap.data();
                     
                     if (data.codigo === inputCode) {
-                        // Código correcto
+                        // Código correcto - Obtener rol del usuario
+                        const userDocRef = doc(db, 'usuarios', currentUser.uid);
+                        const userDocSnap = await getDoc(userDocRef);
+                        
+                        let userRole = 'cliente'; // Por defecto
+                        if (userDocSnap.exists()) {
+                            userRole = userDocSnap.data().tipoUsuario || 'cliente';
+                        }
+                        
                         sessionStorage.setItem('2faVerified', 'true');
+                        sessionStorage.setItem('userRole', userRole);
                         showMessage('✅ Verificación exitosa. Redirigiendo...', 'success');
                         
                         setTimeout(() => {
-                            window.location.href = 'home.html';
+                            if (userRole === 'admin') {
+                                window.location.href = 'admin-dashboard.html';
+                            } else {
+                                window.location.href = 'index.html';
+                            }
                         }, 1000);
                     } else {
                         showMessage('❌ Código incorrecto. Intenta de nuevo.', 'error');

@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carrito - Vestis Store</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background-color: white;
+        }
+        
+        header {
+            background-color: white;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        header h1 {
+            font-size: 28px;
+            color: #000;
+            cursor: pointer;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+        
+        .page-title {
+            font-size: 32px;
+            margin-bottom: 30px;
+            color: #000;
+        }
+        
+        .cart-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+        }
+        
+        .cart-items {
+            background-color: #f9f9f9;
+            padding: 30px;
+            border-radius: 10px;
+        }
+        
+        .cart-item {
+            display: grid;
+            grid-template-columns: 100px 1fr auto;
+            gap: 20px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+        
+        .item-image {
+            width: 100px;
+            height: 100px;
+            object-fit: contain;
+            background-color: #f5f5f5;
+            border-radius: 8px;
+        }
+        
+        .item-info h3 {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #000;
+        }
+        
+        .item-price {
+            font-size: 16px;
+            color: #4CAF50;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .quantity-btn {
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        
+        .quantity-btn:hover {
+            background-color: #1976D2;
+        }
+        
+        .quantity-value {
+            font-size: 16px;
+            font-weight: bold;
+            min-width: 30px;
+            text-align: center;
+        }
+        
+        .item-actions {
+            text-align: right;
+        }
+        
+        .btn-remove {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        .item-subtotal {
+            font-size: 18px;
+            font-weight: bold;
+            color: #000;
+            margin-bottom: 10px;
+        }
+        
+        .cart-summary {
+            background-color: #f9f9f9;
+            padding: 30px;
+            border-radius: 10px;
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+        
+        .summary-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #000;
+        }
+        
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        
+        .summary-row.total {
+            font-size: 20px;
+            font-weight: bold;
+            padding-top: 15px;
+            border-top: 2px solid #ddd;
+            color: #4CAF50;
+        }
+        
+        .btn-checkout {
+            width: 100%;
+            padding: 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        
+        .btn-checkout:hover {
+            background-color: #45a049;
+        }
+        
+        .empty-cart {
+            text-align: center;
+            padding: 60px;
+            color: #666;
+        }
+        
+        .empty-cart-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+        
+        .btn-continue {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 30px;
+            background-color: #2196F3;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1 onclick="window.location.href='index.html'">Vestis Store</h1>
+        <div>
+            <span id="userEmail">👤</span>
+        </div>
+    </header>
+
+    <div class="container">
+        <h1 class="page-title">🛒 Mi Carrito</h1>
+        
+        <div id="emptyCart" class="empty-cart" style="display: none;">
+            <div class="empty-cart-icon">🛒</div>
+            <h2>Tu carrito está vacío</h2>
+            <p>Agrega productos para comenzar tu compra</p>
+            <a href="index.html" class="btn-continue">Continuar Comprando</a>
+        </div>
+
+        <div id="cartContent" class="cart-grid">
+            <div class="cart-items" id="cartItems"></div>
+            
+            <div class="cart-summary">
+                <h2 class="summary-title">Resumen de Compra</h2>
+                
+                <div class="summary-row">
+                    <span>Subtotal:</span>
+                    <span id="subtotal">$0</span>
+                </div>
+                
+                <div class="summary-row">
+                    <span>Envío:</span>
+                    <span id="envio">$15,000</span>
+                </div>
+                
+                <div class="summary-row total">
+                    <span>Total:</span>
+                    <span id="total">$0</span>
+                </div>
+                
+                <button class="btn-checkout" onclick="finalizarCompra()">
+                    Finalizar Compra
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, collection, addDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD5Q8M7chlhNvLuVlUT9vwVYi2YeeFVgdw",
+            authDomain: "vestis-store.firebaseapp.com",
+            databaseURL: "https://vestis-store-default-rtdb.firebaseio.com",
+            projectId: "vestis-store",
+            storageBucket: "vestis-store.firebasestorage.app",
+            messagingSenderId: "772191597035",
+            appId: "1:772191597035:web:d6581633f495e7b7b669ae"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let cart = [];
+        const ENVIO = 15000;
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                document.getElementById('userEmail').textContent = '👤 ' + user.email;
+                loadCart();
+            } else {
+                alert('Debes iniciar sesión para ver tu carrito');
+                window.location.href = 'login.html';
+            }
+        });
+
+        function loadCart() {
+            const savedCart = localStorage.getItem('cart');
+            if (savedCart) {
+                cart = JSON.parse(savedCart);
+                renderCart();
+            } else {
+                showEmptyCart();
+            }
+        }
+
+        function renderCart() {
+            if (cart.length === 0) {
+                showEmptyCart();
+                return;
+            }
+
+            document.getElementById('emptyCart').style.display = 'none';
+            document.getElementById('cartContent').style.display = 'grid';
+
+            const cartItemsDiv = document.getElementById('cartItems');
+            cartItemsDiv.innerHTML = '';
+
+            let subtotal = 0;
+
+            cart.forEach((item, index) => {
+                const itemSubtotal = item.precio * item.cantidad;
+                subtotal += itemSubtotal;
+
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'cart-item';
+                itemDiv.innerHTML = `
+                    <img src="${item.imagenUrl || 'https://via.placeholder.com/100'}" 
+                         alt="${item.nombre}" 
+                         class="item-image">
+                    
+                    <div class="item-info">
+                        <h3>${item.nombre}</h3>
+                        <div class="item-price">$${item.precio.toLocaleString()}</div>
+                        <div class="quantity-controls">
+                            <button class="quantity-btn" onclick="updateQuantity(${index}, -1)">-</button>
+                            <span class="quantity-value">${item.cantidad}</span>
+                            <button class="quantity-btn" onclick="updateQuantity(${index}, 1)">+</button>
+                        </div>
+                    </div>
+                    
+                    <div class="item-actions">
+                        <div class="item-subtotal">$${itemSubtotal.toLocaleString()}</div>
+                        <button class="btn-remove" onclick="removeItem(${index})">Eliminar</button>
+                    </div>
+                `;
+                cartItemsDiv.appendChild(itemDiv);
+            });
+
+            const total = subtotal + ENVIO;
+
+            document.getElementById('subtotal').textContent = '$' + subtotal.toLocaleString();
+            document.getElementById('total').textContent = '$' + total.toLocaleString();
+        }
+
+        function showEmptyCart() {
+            document.getElementById('emptyCart').style.display = 'block';
+            document.getElementById('cartContent').style.display = 'none';
+        }
+
+        window.updateQuantity = function(index, change) {
+            cart[index].cantidad += change;
+            
+            if (cart[index].cantidad <= 0) {
+                cart.splice(index, 1);
+            }
+            
+            saveCart();
+            renderCart();
+        };
+
+        window.removeItem = function(index) {
+            if (confirm('¿Seguro que deseas eliminar este producto?')) {
+                cart.splice(index, 1);
+                saveCart();
+                renderCart();
+            }
+        };
+
+        function saveCart() {
+            localStorage.setItem('cart', JSON.stringify(cart));
+        }
+
+        window.finalizarCompra = async function() {
+            if (!auth.currentUser) {
+                alert('Debes iniciar sesión');
+                return;
+            }
+
+            if (cart.length === 0) {
+                alert('El carrito está vacío');
+                return;
+            }
+
+            try {
+                const subtotal = cart.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
+                const total = subtotal + ENVIO;
+
+                // Guardar venta en Firebase
+                const venta = {
+                    userId: auth.currentUser.uid,
+                    userEmail: auth.currentUser.email,
+                    productos: cart,
+                    subtotal: subtotal,
+                    envio: ENVIO,
+                    total: total,
+                    fecha: new Date().toISOString(),
+                    estado: 'pendiente'
+                };
+
+                const docRef = await addDoc(collection(db, 'ventas'), venta);
+
+                // Generar factura
+                window.location.href = `factura.html?id=${docRef.id}`;
+            } catch (error) {
+                alert('Error al procesar la compra: ' + error.message);
+            }
+        };
+    </script>
+</body>
+</html>

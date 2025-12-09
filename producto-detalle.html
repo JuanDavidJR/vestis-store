@@ -242,6 +242,14 @@
                         <div class="sizes-label">TALLAS :</div>
                         <div class="sizes-options" id="productSizes"></div>
                     </div>
+
+                    <button onclick="addToCart()" style="width: 100%; padding: 15px; background-color: #4CAF50; color: white; border: none; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 20px;">
+                        🛒 Agregar al Carrito
+                    </button>
+                    
+                    <a href="carrito.html" style="display: inline-block; width: 100%; padding: 15px; background-color: #2196F3; color: white; text-align: center; border-radius: 8px; font-size: 16px; font-weight: bold; text-decoration: none; margin-top: 15px;">
+                        Ver Carrito
+                    </a>
                     
                     <div class="specs-section">
                         <h3 class="specs-title">ESPECIFICACIONES</h3>
@@ -293,6 +301,7 @@
         const db = getFirestore(app);
 
         let currentProductId = null;
+        let currentProduct = null;
 
         onAuthStateChanged(auth, async (user) => {
             if (!user) {
@@ -319,6 +328,7 @@
                 
                 if (docSnap.exists()) {
                     const product = docSnap.data();
+                    currentProduct = { id: productId, ...product };
                     
                     document.getElementById('productName').textContent = product.nombre || 'Sin nombre';
                     document.getElementById('productPrice').textContent = `$ ${Number(product.precio || 0).toLocaleString()}`;
@@ -362,6 +372,30 @@
                     alert('Error al eliminar producto: ' + error.message);
                 }
             }
+        };
+
+        window.addToCart = function() {
+            if (!currentProduct) return;
+
+            let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+            
+            const existingItem = cart.find(item => item.id === currentProduct.id);
+            
+            if (existingItem) {
+                existingItem.cantidad++;
+            } else {
+                cart.push({
+                    id: currentProduct.id,
+                    nombre: currentProduct.nombre,
+                    precio: currentProduct.precio,
+                    imagenUrl: currentProduct.imagenUrl,
+                    cantidad: 1
+                });
+            }
+            
+            localStorage.setItem('cart', JSON.stringify(cart));
+            
+            alert('✅ Producto agregado al carrito');
         };
     </script>
 </body>
